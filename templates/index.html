@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Ink Display Control</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link href="https://fonts.cdnfonts.com/css/g-grumpy-rabbit" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/spotted-fever" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/helloetchasketch" rel="stylesheet">
+                
+                
+                
+    <!-- Vue.js Development CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #181515;
+        }
+        .header_image {
+            font-family: 'G Grumpy Rabbit', sans-serif;
+            font-size: 40px;
+        }
+        .header_weather {
+            font-family: 'HelloEtchASketch', sans-serif;
+                                                
+            font-size: 40px;
+        }
+        .header {
+            font-family: 'Spotted Fever', sans-serif;
+            font-size: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <badge class="badge"><h1 class="text-white header">Control the E-Ink</h1></badge>
+        
+        <!-- Your Vue.js Application Root Element -->
+        <div class="d-flex flex-column align-items-center justify-content-center" id="app">
+            <div class="p-3">
+                <div class="progress" v-if="isLoading">
+                    <div class="progress-bar bg-success p-3" role="progressbar" :style="{ width: progress + '%' }" aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
+                        <input v-model="progress" type="range" class="form-range" min="0" max="100">
+                    </div>
+                    
+                </div>
+            </div>
+           
+            
+          
+            <div class="card text-white bg-success mb-3" style="max-width: 20rem;">
+                <div class="card-header">
+                    <h2 class="card-title header_weather">Clima</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="alert alert-dismissible alert-success">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <strong></strong>Con el siguiente boton puedes actualizar el clima!.
+                        </div>
+                        <form @submit.prevent="triggerWeather" method="post">
+                            <button type="submit" class="btn btn-secondary">Actualizar</button>
+                        </form>
+                    </div>
+                </div>
+              </div>
+              <div class="card text-white bg-danger mb-3" style="max-width: 20rem;">
+                <div class="card-header">
+                    <h2 class="card-title header_image">AI Art!</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div class="alert alert-dismissible alert-danger">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <strong>  </strong>con cautela, no es gratis! 
+                          </div>
+                        <form  @submit.prevent="triggerImage">
+                            
+                            <textarea v-model="prompt" type="text" id="prompt" name="prompt" class="form-control" placeholder="un dibujo de una ciudad bajo el agua..."></textarea>
+                            <br>
+                            <button type="submit" class="btn btn-secondary">Generar</button>
+                           
+                        </form>
+                    </div>
+                </div>
+              </div>
+              </div>
+            
+
+           
+            
+        </div>
+    </div>
+
+    <!-- Script placed at the end of the body -->
+    <script>
+        // Wait for DOM content to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Vue.js app initialization
+            const app = Vue.createApp({
+                delimiters: ['[[', ']]'], // Change delimiters to avoid conflicts with Jinja2
+                data() {
+                    return {
+                        message: 'Welcome to the E-Ink Display Control Panel!',
+                        prompt: '',
+                        isLoading: false,
+                        progress: 0
+                    }
+                },
+                methods: {
+                    async triggerWeather() {
+                        this.isLoading = true;
+                        this.progress = 0;
+
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/trigger_weather');
+                        } catch (error) {
+                            return this.errorFile()
+                        }
+                         finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                    },
+                    async triggerImage() {
+                        this.isLoading = true;
+                        this.progress = 0;
+                        console.log(this.prompt)
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/trigger_image/', { prompt: this.prompt });
+                        } catch (error) {
+                            return this.errorFile()
+                        } finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                    },
+                    errorFile() {
+                        this.isLoading = false;
+                        this.progress = 0;
+                        window.location.href = "/error"; 
+                    },
+                    successFile() {
+                        this.isLoading = false;
+                        this.progress = 0;
+                        window.location.href = "/success"; 
+                    },
+                    async makePostRequest(url, params = {}) {
+                        try {
+                            // Simulate progress with an interval
+                            const progressInterval = setInterval(() => {
+                                if (this.progress < 90) this.progress += 10; // Increase progress by 10 until 90%
+                            }, 200);
+
+                            // Append parameters to the URL
+                            const queryString = new URLSearchParams(params).toString();
+                            const fullUrl = `${url}`;
+
+                            // Send data to the backend with fetch
+                            const response = await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(params) // Send params as JSON in the request body
+                            });
+
+                            // Clear the interval and set progress to 100% once completed
+                            clearInterval(progressInterval);
+                            this.progress = 10;
+
+                            // Check response status and handle success or failure
+                            if (response.status === 200) {
+                                return this.successFile();
+                            } else {
+                                throw new Error("Request failed");
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            return this.errorFile();
+                        } finally {
+                            // Reset loading state and progress
+                            
+                            this.isLoading = false;
+                            setTimeout(() => (this.progress = 0), 500); // Reset progress after a brief pause
+                        }
+                    },
+                }
+            });
+
+            // Mount Vue app to the #app div
+            app.mount('#app');
+        });
+    </script>
+
+    <!-- Bootstrap JS (optional, if you need JS components) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
