@@ -36,18 +36,23 @@
             font-family: 'Spotted Fever', sans-serif;
             font-size: 40px;
         }
+        .form-range {
+            width: 100%;
+            margin-top: 10px;
+            
+        }
     </style>
 </head>
 <body>
     <div class="container text-center">
-        <badge class="badge"><h1 class="text-white header">Control the E-Ink</h1></badge>
+        <badge class="badge"><h1 class="text-warning header">Control the E-Ink</h1></badge>
         
         <!-- Your Vue.js Application Root Element -->
         <div class="d-flex flex-column align-items-center justify-content-center" id="app">
             <div class="p-3">
                 <div class="progress" v-if="isLoading">
-                    <div class="progress-bar bg-success p-3" role="progressbar" :style="{ width: progress + '%' }" aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
-                        <input v-model="progress" type="range" class="form-range" min="0" max="100">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning p-3" role="progressbar" :style="{ width: progress + '%' }" aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
+                        <input v-model="progress" type="range" class="form-range" min="0" max="200">
                     </div>
                     
                 </div>
@@ -55,30 +60,29 @@
            
             
           
-            <div class="card text-white bg-success mb-3" style="max-width: 20rem;">
+            <div class="card text-white bg-success mb-3 w-100" style="max-width: 20rem;">
                 <div class="card-header">
                     <h2 class="card-title header_weather">Clima</h2>
                 </div>
-                <div class="card-body">
+                <div class="card-header text-center">
                     <div class="form-group">
-                        <div class="alert alert-dismissible alert-success">
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            <strong></strong>Con el siguiente boton puedes actualizar el clima!.
-                        </div>
-                        <form @submit.prevent="triggerWeather" method="post">
-                            <button type="submit" class="btn btn-secondary">Actualizar</button>
-                        </form>
+                        
+                            
+                            <form @submit.prevent="triggerWeather" method="post">
+                                <button type="submit" class="btn btn-secondary">Actualizar</button>
+                            </form>
+                        
+                        
                     </div>
                 </div>
               </div>
-              <div class="card text-white bg-danger mb-3" style="max-width: 20rem;">
+              <div class="card text-white bg-danger mb-3 w-100" style="max-width: 20rem;">
                 <div class="card-header">
                     <h2 class="card-title header_image">AI Art!</h2>
                 </div>
                 <div class="card-body">
                     <div class="form-group">
                         <div class="alert alert-dismissible alert-danger">
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             <strong>  </strong>con cautela, no es gratis! 
                           </div>
                         <form  @submit.prevent="triggerImage">
@@ -157,45 +161,47 @@
                         window.location.href = "/success"; 
                     },
                     async makePostRequest(url, params = {}) {
-                        try {
-                            // Simulate progress with an interval
-                            const progressInterval = setInterval(() => {
-                                if (this.progress < 90) this.progress += 10; // Increase progress by 10 until 90%
-                            }, 200);
+                    try {
+                        // Simulate progress with an interval
+                        const progressInterval = setInterval(() => {
+                            if (this.progress < 90) this.progress += 1; // Increase progress by 1 until 90%
+                        }, 100); // Progress every 100ms
 
-                            // Append parameters to the URL
-                            const queryString = new URLSearchParams(params).toString();
-                            const fullUrl = `${url}`;
+                        // Add a 10-second delay before making the request
+                        await new Promise(resolve => setTimeout(resolve, 10000));
 
-                            // Send data to the backend with fetch
-                            const response = await fetch(url, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(params) // Send params as JSON in the request body
-                            });
+                        // Append parameters to the URL
+                        const queryString = new URLSearchParams(params).toString();
+                        const fullUrl = `${url}`;
 
-                            // Clear the interval and set progress to 100% once completed
-                            clearInterval(progressInterval);
-                            this.progress = 10;
+                        // Send data to the backend with fetch
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(params) // Send params as JSON in the request body
+                        });
 
-                            // Check response status and handle success or failure
-                            if (response.status === 200) {
-                                return this.successFile();
-                            } else {
-                                throw new Error("Request failed");
-                            }
-                        } catch (error) {
-                            console.error(error);
-                            return this.errorFile();
-                        } finally {
-                            // Reset loading state and progress
-                            
-                            this.isLoading = false;
-                            setTimeout(() => (this.progress = 0), 500); // Reset progress after a brief pause
+                        // Clear the interval and set progress to 100% once completed
+                        clearInterval(progressInterval);
+                        this.progress = 100;
+
+                        // Check response status and handle success or failure
+                        if (response.status === 200) {
+                            return this.successFile();
+                        } else {
+                            throw new Error("Request failed");
                         }
-                    },
+                    } catch (error) {
+                        console.error(error);
+                        return this.errorFile();
+                    } finally {
+                        // Reset loading state and progress
+                        this.isLoading = false;
+                        setTimeout(() => (this.progress = 0), 500); // Reset progress after a brief pause
+                    }
+                }
                 }
             });
 
