@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Ink Display Control</title>
+    <title>Control E-Ink</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -11,7 +11,8 @@
     <link href="https://fonts.cdnfonts.com/css/g-grumpy-rabbit" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/spotted-fever" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/helloetchasketch" rel="stylesheet">
-                
+    <!--Favicon-->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
                 
                 
     <!-- Vue.js Development CDN -->
@@ -164,12 +165,13 @@
                     try {
                         // Simulate progress with an interval
                         const progressInterval = setInterval(() => {
-                            if (this.progress < 90) this.progress += 1; // Increase progress by 1 until 90%
+                            if (this.progress < 90) this.progress += 10; // Increase progress by 1 until 90%
                         }, 100); // Progress every 100ms
 
-                        // Add a 10-second delay before making the request
-                        await new Promise(resolve => setTimeout(resolve, 10000));
-
+                        if (url === '/trigger_weather') {
+                            await new Promise(resolve => setTimeout(resolve, 5000));    
+                        }
+                        
                         // Append parameters to the URL
                         const queryString = new URLSearchParams(params).toString();
                         const fullUrl = `${url}`;
