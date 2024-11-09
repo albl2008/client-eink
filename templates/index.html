@@ -42,6 +42,9 @@
             margin-top: 10px;
             
         }
+        .btn {
+            min-width: 100px; /* Adjust this to ensure the buttons are large enough */
+        }
     </style>
 </head>
 <body>
@@ -94,15 +97,27 @@
                            
                         </form>
                     </div>
+                    <div class="card bg-danger border border-secondary pt-3">
+                        <div class="text-center">
+                            <div class="form-group d-flex justify-content-center">
+                                <form @submit.prevent="triggerLast" method="post" class="mr-2">
+                                    <button type="submit" class="btn btn-secondary">Ver ultima</button>
+                                </form>
+                                <form @submit.prevent="triggerRandom" method="post">
+                                    <button type="submit" class="btn btn-secondary">Ver aleatoria</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                       
+                      </div>
                 </div>
               </div>
-              </div>
-            
-
+              
+     
            
             
-        </div>
-    </div>
 
     <!-- Script placed at the end of the body -->
     <script>
@@ -128,13 +143,45 @@
                             // Simulate progress
                             await this.makePostRequest('/trigger_weather');
                         } catch (error) {
-                            return this.errorFile()
+                            return this.errorFile(error)
                         }
                          finally {
                            
                             this.isLoading = false;
                             this.progress = 0;
                         }
+                    },
+                    async triggerLast() {
+                        this.isLoading = true;
+                        this.progress = 0;
+                        
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/trigger_last');
+                        } catch (error) {
+                            return this.errorFile(error)
+                        } finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                        
+                    },
+                    async triggerRandom() {
+                        this.isLoading = true;
+                        this.progress = 0;
+                        console.log(this.prompt)
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/trigger_random', { prompt: this.prompt });
+                        } catch (error) {
+                            return this.errorFile(error)
+                        } finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                        
                     },
                     async triggerImage() {
                         this.isLoading = true;
@@ -144,17 +191,20 @@
                             // Simulate progress
                             await this.makePostRequest('/trigger_image/', { prompt: this.prompt });
                         } catch (error) {
-                            return this.errorFile()
+                            return this.errorFile(error)
                         } finally {
                            
                             this.isLoading = false;
                             this.progress = 0;
                         }
                     },
-                    errorFile() {
+                    errorFile(error) {
                         this.isLoading = false;
                         this.progress = 0;
-                        window.location.href = "/error"; 
+                        
+                        // Encode the error message and append it to the URL as a query parameter
+                        const errorMessage = encodeURIComponent(error.message || "An unknown error occurred");
+                        window.location.href = `/error?message=${errorMessage}`; 
                     },
                     successFile() {
                         this.isLoading = false;
@@ -168,7 +218,7 @@
                             if (this.progress < 90) this.progress += 10; // Increase progress by 1 until 90%
                         }, 100); // Progress every 100ms
 
-                        if (url === '/trigger_weather') {
+                        if (url !== '/trigger_image' ) {
                             await new Promise(resolve => setTimeout(resolve, 5000));    
                         }
                         
@@ -197,7 +247,7 @@
                         }
                     } catch (error) {
                         console.error(error);
-                        return this.errorFile();
+                        return this.errorFile(error);
                     } finally {
                         // Reset loading state and progress
                         this.isLoading = false;

@@ -6,6 +6,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # URL of the E-Ink Display Server (replace with the actual IP of your e-ink display server)
 EINK_SERVER_URL = "http://localhost:8080"
+RPI3_SERVER_URL = "http://192.168.100.179:5005"
 
 @app.route("/")
 def index():
@@ -16,6 +17,25 @@ def index():
 def trigger_weather():
     try:
         response = requests.get(f"{EINK_SERVER_URL}/render_weather/")
+        response.raise_for_status()  # Raises an exception if the status code is not 2xx
+        return "Weather update triggered", 200
+    except requests.exceptions.RequestException as e:
+        print(f"Error triggering weather: {e}")
+        return "Error", 500
+
+@app.route("/trigger_last", methods=["POST"])
+def trigger_last():
+    try:
+        response = requests.get(f"{RPI3_SERVER_URL}/last")
+        response.raise_for_status()  # Raises an exception if the status code is not 2xx
+        return "Weather update triggered", 200
+    except requests.exceptions.RequestException as e:
+        print(f"Error triggering weather: {e}")
+        return "Error", 500
+@app.route("/trigger_random", methods=["POST"])
+def trigger_random():
+    try:
+        response = requests.get(f"{RPI3_SERVER_URL}/random")
         response.raise_for_status()  # Raises an exception if the status code is not 2xx
         return "Weather update triggered", 200
     except requests.exceptions.RequestException as e:
@@ -37,7 +57,8 @@ def trigger_image():
         return "Error", 500
 @app.route("/error")
 def error():
-    return render_template("error.html")
+    error_message = request.args.get('message', 'Unknown error')
+    return render_template("error.html",error_message=error_message)
 
 @app.route("/success")
 def success():
