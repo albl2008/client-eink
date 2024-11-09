@@ -5,7 +5,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # URL of the E-Ink Display Server (replace with the actual IP of your e-ink display server)
-EINK_SERVER_URL = "http://localhost:8080"
+EINK_SERVER_URL = "http://192.168.100.31:8080"
 RPI3_SERVER_URL = "http://192.168.100.179:5005"
 
 @app.route("/")
