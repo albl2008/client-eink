@@ -8,6 +8,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link href="https://fonts.cdnfonts.com/css/g-grumpy-rabbit" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/spotted-fever" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/helloetchasketch" rel="stylesheet">
@@ -48,21 +49,25 @@
     </style>
 </head>
 <body>
-    <div class="container text-center">
-        <badge class="badge"><h1 class="text-warning header">Control the E-Ink</h1></badge>
-        
-        <!-- Your Vue.js Application Root Element -->
-        <div class="d-flex flex-column align-items-center justify-content-center" id="app">
+    <div id="app">
+        <div class="loader-container" v-if="isLoading">
             <div class="p-3">
-                <div class="progress" v-if="isLoading">
+                <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning p-3" role="progressbar" :style="{ width: progress + '%' }" aria-valuenow="progress" aria-valuemin="0" aria-valuemax="100">
                         <input v-model="progress" type="range" class="form-range" min="0" max="200">
                     </div>
-                    
                 </div>
             </div>
-           
+        </div>
+    <div class="container text-center background" >
+        
+        <badge class="badge"><h1 class="text-warning header">Control the E-Ink</h1></badge>
+        
+        <!-- Your Vue.js Application Root Element -->
+        <div class="d-flex flex-column align-items-center justify-content-center" >
             
+           
+            <div id="loader" class="loader"></div>
           
             <div class="card text-white bg-success mb-3 w-100" style="max-width: 20rem;">
                 <div class="card-header">
@@ -97,7 +102,7 @@
                            
                         </form>
                     </div>
-                    <div class="card bg-danger border border-secondary pt-3">
+                    <!-- <div class="card bg-danger border border-secondary pt-3">
                         <div class="text-center">
                             <div class="form-group d-flex justify-content-center">
                                 <form @submit.prevent="triggerLast" method="post" class="mr-2">
@@ -108,14 +113,36 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
-                    
+                    </div> -->
+
+                    <div class="card bg-danger border border-secondary pt-3" id="imageSlider">
+                        <div class="image-container p-2">
+                            <img :src="currentImage" class="d-block w-100" alt="Slider Image">
+                        </div>
+                        <div class="bg-danger pt-3">
+                            <div class="text-center">
+                                <div class="flex m-2">
+                                    <button @click="prevImage" class="btn btn-secondary mr-2"><</button>
+                                    <button @click="nextImage" class="btn btn-secondary">></button>
+                                </div>
+                                <div class="slider-controls form-group d-flex justify-content-center">
+                                    
+                                    
+                                    <form @submit.prevent="viewImage(currentImage)" method="post" class="mr-2">
+                                        <button type="submit" id="verButton" class="btn btn-secondary">Ver</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>   
                        
-                      </div>
+                    </div>
+
+                      
+                            
                 </div>
               </div>
               
-     
+            </div>
            
             
 
@@ -128,10 +155,26 @@
                 delimiters: ['[[', ']]'], // Change delimiters to avoid conflicts with Jinja2
                 data() {
                     return {
+                        images: [],
+                        currentIndex: 0,
                         message: 'Welcome to the E-Ink Display Control Panel!',
                         prompt: '',
                         isLoading: false,
                         progress: 0
+                    }
+                },
+                computed: {
+                    currentImage() {
+                        return this.images[this.currentIndex] || ''; // Current image to display
+                    }
+                },
+                watch: {
+                isLoading(newVal) {
+                        if (newVal) {
+                            document.body.classList.add('loading');
+                        } else {
+                            document.body.classList.remove('loading');
+                        }
                     }
                 },
                 methods: {
@@ -151,6 +194,29 @@
                             this.progress = 0;
                         }
                     },
+                    async fetchImages() {
+                    try {
+                            const response = await fetch('/images');
+                            if (response.ok) {
+                                this.images = await response.json();
+                                this.currentIndex = 0; // Reset to the first image
+                            } else {
+                                throw new Error('Failed to fetch images');
+                            }
+                        } catch (error) {
+                            console.error('Error fetching images:', error);
+                        }
+                     },
+                    nextImage() {
+                        if (this.images.length > 0) {
+                            this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                        }
+                    },
+                    prevImage() {
+                        if (this.images.length > 0) {
+                            this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                        }
+                    },
                     async triggerLast() {
                         this.isLoading = true;
                         this.progress = 0;
@@ -167,6 +233,24 @@
                         }
                         
                     },
+
+                    async viewImage(filepath){
+                        this.isLoading = true;
+                        this.progress = 0;
+                        filepath = filepath.split('/').pop();
+                        
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/view', { filepath: filepath });
+                        } catch (error) {
+                            return this.errorFile(error)
+                        } finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                    },
+
                     async triggerRandom() {
                         this.isLoading = true;
                         this.progress = 0;
@@ -254,9 +338,12 @@
                         setTimeout(() => (this.progress = 0), 500); // Reset progress after a brief pause
                     }
                 }
+                },
+                mounted() {
+                    this.fetchImages(); // Fetch images on component mount
                 }
-            });
 
+            });
             // Mount Vue app to the #app div
             app.mount('#app');
         });

@@ -1,0 +1,18 @@
+body.loading .background{
+    filter: blur(5px); /* You can adjust the level of blur */
+    pointer-events: none; /* Disable interactions with the background */
+  }
+
+.loader-container {
+    position: fixed; /* Fix it to the screen */
+    top: 50%; /* Position it at the vertical center */
+    left: 50%; /* Position it at the horizontal center */
+    transform: translate(-50%, -50%); /* Adjust the element's position to truly center it */
+    z-index: 9999; /* Ensure it appears above other content */
+    width: 100%; /* Optional: Make it take up full screen width */
+    height: 100%; /* Optional: Make it take up full screen height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto; 
+  }

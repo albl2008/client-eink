@@ -42,7 +42,30 @@ def trigger_random():
         print(f"Error triggering weather: {e}")
         return "Error", 500
 
-@app.route("/trigger_image/", methods=["POST"])
+@app.route("/view", methods=["POST"])
+def view():
+    data = request.get_json()
+    filepath = data.get('filepath', '')
+    print(f"Filepath received: {filepath}")
+    try:
+        response = requests.get(f"{RPI3_SERVER_URL}/view/{filepath}")
+        response.raise_for_status()  # Raises an exception if the status code is not 2xx
+        return "Weather update triggered", 200
+    except requests.exceptions.RequestException as e:
+        print(f"Error triggering weather: {e}")
+        return "Error", 500
+
+@app.route("/images", methods=["GET"])
+def get_images():
+    try:
+        response = requests.get(f"{RPI3_SERVER_URL}/images")
+        response.raise_for_status()  # Raises an exception if the status code is not 2xx
+        return response.json(), 200
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching images: {e}")
+        return "Error", 500
+
+@app.route("/trigger_image", methods=["POST"])
 def trigger_image():
     data = request.get_json()
     prompt = data.get('prompt', '')
