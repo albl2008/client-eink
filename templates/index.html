@@ -196,7 +196,12 @@
                     },
                     async fetchImages() {
                     try {
-                            const response = await fetch('/images');
+                        const response = await fetch('/images', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
                             if (response.ok) {
                                 this.images = await response.json();
                                 this.currentIndex = 0; // Reset to the first image
