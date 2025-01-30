@@ -85,6 +85,21 @@
                     </div>
                 </div>
               </div>
+              <div class="card text-white bg-warning mb-3 w-100" style="max-width: 20rem;">
+                <div class="card-header">
+                    <h2 class="card-title header_weather">Astronomy</h2>
+                </div>
+                <div class="card-header text-center">
+                    <div class="form-group">
+                        
+                            <form @submit.prevent="triggerAPOD" method="post">
+                                <button type="submit" class="btn btn-secondary">APOD</button>
+                            </form>
+                        
+                        
+                    </div>
+                </div>
+              </div>
               <div class="card text-white bg-danger mb-3 w-100" style="max-width: 20rem;">
                 <div class="card-header">
                     <h2 class="card-title header_image">AI Art!</h2>
@@ -160,6 +175,7 @@
                         message: 'Welcome to the E-Ink Display Control Panel!',
                         prompt: '',
                         isLoading: false,
+                        explanation: '',
                         progress: 0
                     }
                 },
@@ -185,6 +201,22 @@
                         try {
                             // Simulate progress
                             await this.makePostRequest('/trigger_weather');
+                        } catch (error) {
+                            return this.errorFile(error)
+                        }
+                         finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+                    },
+                    async triggerAPOD() {
+                        this.isLoading = true;
+                        this.progress = 0;
+
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/trigger_apod');
                         } catch (error) {
                             return this.errorFile(error)
                         }
@@ -295,10 +327,11 @@
                         const errorMessage = encodeURIComponent(error.message || "An unknown error occurred");
                         window.location.href = `/error?message=${errorMessage}`; 
                     },
-                    successFile() {
+
+                    successFile(message) {
                         this.isLoading = false;
                         this.progress = 0;
-                        window.location.href = "/success"; 
+                        window.location.href = `/success?message=${message}`; 
                     },
                     async makePostRequest(url, params = {}) {
                     try {
@@ -330,7 +363,14 @@
 
                         // Check response status and handle success or failure
                         if (response.status === 200) {
-                            return this.successFile();
+                            if (url === '/trigger_apod') {
+                                console.log(response)
+                                const explanation = response.content
+                                this.explanation = explanation;
+                                //return this.successFile(explanation);
+                            }else {
+                                return this.successFile();
+                            }
                         } else {
                             throw new Error("Request failed");
                         }

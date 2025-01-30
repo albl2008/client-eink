@@ -22,6 +22,21 @@ def trigger_weather():
     except requests.exceptions.RequestException as e:
         print(f"Error triggering weather: {e}")
         return "Error", 500
+    
+
+@app.route("/trigger_apod", methods=["POST"])
+def trigger_apod():
+    try:
+        print("Triggering APOD")
+        response = requests.get("http://localhost:8080/apod")
+        print(response.content)
+        response.body = response.content
+        response.raise_for_status()  # Raises an exception if the status code is not 2xx
+        return response, 200
+    except requests.exceptions.RequestException as e:
+        print(f"Error triggering weather: {e}")
+        return "Error", 500
+
 
 @app.route("/trigger_last", methods=["POST"])
 def trigger_last():
