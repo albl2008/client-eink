@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASI...</title>
+     <!-- Bootstrap CSS -->
+     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+     <!-- Custom CSS -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #181515;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center mt-5">
+
+        <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="backtoIndex()"></button>
+            <strong> Eliminada </strong> la imagen
+          </div>
+    </div>
+</body>
+<script>
+    const backtoIndex = () => {
+        window.location.href = "/";
+    }
+</script>
+</html>

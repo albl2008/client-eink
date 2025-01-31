@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, jsonify, render_template, request, redirect, url_for
 import requests
 
 app = Flask(__name__)
@@ -35,6 +35,35 @@ def trigger_apod():
     except requests.exceptions.RequestException as e:
         print(f"Error triggering weather: {e}")
         return "Error", 500
+
+@app.route("/delete", methods=["POST"])
+def delete():
+    data = request.get_json()
+    image_url = data.get('image', '')
+    print(f"Image URL received: {image_url}")
+
+    try:
+        # 1. Extract the filename from the URL
+        image_name = image_url.split("/")[-1]  # Split by "/" and take the last part
+        print(f"Image name to delete: {image_name}")
+
+
+        # 2. Send only the filename to the RPi server
+        rpi_delete_url = f"{RPI3_SERVER_URL}/delete/{image_name}"
+        print(f"RPi delete URL: {rpi_delete_url}")
+
+        response = requests.delete(rpi_delete_url) # Use DELETE method, more appropriate for deleting
+        response.raise_for_status()
+        return jsonify({"message": "Image deleted"}), 200  # Return JSON
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error deleting image: {e}")
+        return jsonify({"error": str(e)}), response.status_code if hasattr(response, 'status_code') else 500  # More informative error handling
+    except IndexError: # Handle cases where the URL is malformed
+        return jsonify({"error": "Invalid image URL"}), 400
+    except Exception as e: # Catch general exceptions
+        print(f"An unexpected error occurred: {e}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 
 @app.route("/trigger_last", methods=["POST"])
@@ -102,6 +131,8 @@ def success():
     isApod = request.args.get('message', '')
     if isApod == "" or isApod == 'undefined':
         isApod = False
+    if isApod == 'Image deleted':
+        return render_template("deleted.html")
     return render_template("success.html",isApod=isApod)
 
 if __name__ == "__main__":

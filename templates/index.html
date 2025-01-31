@@ -13,6 +13,8 @@
     <link href="https://fonts.cdnfonts.com/css/spotted-fever" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/helloetchasketch" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/nickerbocker-normal" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
                 
     <!--Favicon-->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
@@ -106,7 +108,7 @@
                             
                             <textarea v-model="prompt" type="text" id="prompt" name="prompt" class="form-control" placeholder="un dibujo de una ciudad bajo el agua..."></textarea>
                             <br>
-                            <button type="submit" class="btn btn-secondary">Generar</button>
+                            
                            
                         </form>
                     </div>
@@ -126,7 +128,11 @@
                     <div class="card bg-danger border border-secondary pt-3" id="imageSlider">
                         <div class="image-container p-2">
                             <img :src="currentImage" class="d-block w-100" alt="Slider Image">
+                           
                         </div>
+                        <button v-if="currentImage.split('/').pop() !== 'weather.png' && currentImage.split('/').pop() !== 'image.png'" @click="deleteImage(currentImage)" class="btn btn-danger" style="top: 10px; right: 10px;">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                         <div class="bg-danger pt-3">
                             <div class="text-center">
                                 <div class="flex m-2">
@@ -220,6 +226,22 @@
                             this.isLoading = false;
                             this.progress = 0;
                         }
+                    },
+                    async deleteImage(image) {
+                        this.isLoading = true;
+                        this.progress = 0;
+                        
+                        try {
+                            // Simulate progress
+                            await this.makePostRequest('/delete', { image: image });
+                        } catch (error) {
+                            return this.errorFile(error)
+                        } finally {
+                           
+                            this.isLoading = false;
+                            this.progress = 0;
+                        }
+
                     },
                     async triggerAPOD() {
                         this.isLoading = true;
@@ -321,7 +343,7 @@
                         console.log(this.prompt)
                         try {
                             // Simulate progress
-                            await this.makePostRequest('/trigger_image/', { prompt: this.prompt });
+                            await this.makePostRequest('/trigger_image', { prompt: this.prompt });
                         } catch (error) {
                             return this.errorFile(error)
                         } finally {
@@ -376,7 +398,10 @@
                         if (response.status === 200) {
                             if (url === '/trigger_apod') {
                                 return this.successFile('https://apod.nasa.gov/apod/astropix.html');
-                            }else {
+                            } else if (url === '/delete') {
+                                return this.successFile('Image deleted');
+                            } 
+                            else {
                                 return this.successFile();
                             }
                         } else {
