@@ -28,11 +28,10 @@ def trigger_weather():
 def trigger_apod():
     try:
         print("Triggering APOD")
-        response = requests.get("http://localhost:8080/apod")
-        print(response.content)
-        response.body = response.content
+        response = requests.get(f"{EINK_SERVER_URL}/apod")
+        print(response)
         response.raise_for_status()  # Raises an exception if the status code is not 2xx
-        return response, 200
+        return "Apod update triggered", 200
     except requests.exceptions.RequestException as e:
         print(f"Error triggering weather: {e}")
         return "Error", 500
@@ -100,7 +99,10 @@ def error():
 
 @app.route("/success")
 def success():
-    return render_template("success.html")
+    isApod = request.args.get('message', '')
+    if isApod == "" or isApod == 'undefined':
+        isApod = False
+    return render_template("success.html",isApod=isApod)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)

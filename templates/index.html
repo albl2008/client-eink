@@ -12,6 +12,8 @@
     <link href="https://fonts.cdnfonts.com/css/g-grumpy-rabbit" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/spotted-fever" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/helloetchasketch" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/nickerbocker-normal" rel="stylesheet">
+                
     <!--Favicon-->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
                 
@@ -31,6 +33,11 @@
         }
         .header_weather {
             font-family: 'HelloEtchASketch', sans-serif;
+                                                
+            font-size: 40px;
+        }
+        .header_astro {
+            font-family: 'Nickerbocker-Normal', sans-serif;
                                                 
             font-size: 40px;
         }
@@ -85,21 +92,7 @@
                     </div>
                 </div>
               </div>
-              <div class="card text-white bg-warning mb-3 w-100" style="max-width: 20rem;">
-                <div class="card-header">
-                    <h2 class="card-title header_weather">Astronomy</h2>
-                </div>
-                <div class="card-header text-center">
-                    <div class="form-group">
-                        
-                            <form @submit.prevent="triggerAPOD" method="post">
-                                <button type="submit" class="btn btn-secondary">APOD</button>
-                            </form>
-                        
-                        
-                    </div>
-                </div>
-              </div>
+              
               <div class="card text-white bg-danger mb-3 w-100" style="max-width: 20rem;">
                 <div class="card-header">
                     <h2 class="card-title header_image">AI Art!</h2>
@@ -137,8 +130,8 @@
                         <div class="bg-danger pt-3">
                             <div class="text-center">
                                 <div class="flex m-2">
-                                    <button @click="prevImage" class="btn btn-secondary mr-2">PREV</button>
-                                    <button @click="nextImage" class="btn btn-secondary">NEXT</button>
+                                    <button @click="prevImage" class="btn btn-secondary mr-2"><</button>
+                                    <button @click="nextImage" class="btn btn-secondary">></button>
                                 </div>
                                 <div class="slider-controls form-group d-flex justify-content-center">
                                     
@@ -154,6 +147,24 @@
 
                       
                             
+                </div>
+              </div>
+              <div class="card text-white bg-warning mb-3 w-100" style="max-width: 20rem;">
+                <div class="card-header">
+                    <h2 class="card-title header_astro">Astronomy</h2>
+                </div>
+                <div class="card-header text-center">
+                    <div class="form-group">
+                        <div class="alert alert-dismissible alert-warning">
+                            <strong></strong> Picture of the Day
+                          </div>
+                        
+                            <form @submit.prevent="triggerAPOD" method="post">
+                                <button type="submit" class="btn btn-secondary">APOD</button>
+                            </form>
+                        
+                        
+                    </div>
                 </div>
               </div>
               
@@ -364,10 +375,7 @@
                         // Check response status and handle success or failure
                         if (response.status === 200) {
                             if (url === '/trigger_apod') {
-                                console.log(response)
-                                const explanation = response.content
-                                this.explanation = explanation;
-                                //return this.successFile(explanation);
+                                return this.successFile('https://apod.nasa.gov/apod/astropix.html');
                             }else {
                                 return this.successFile();
                             }
